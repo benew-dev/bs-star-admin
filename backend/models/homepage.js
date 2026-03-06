@@ -60,7 +60,6 @@ homePageSchema.pre("save", async function (next) {
       );
     }
   }
-  next();
 });
 
 export default mongoose.models.HomePage ||
