@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useContext } from "react";
 import HomePageContext from "@/context/HomePageContext";
 
-export default function HomePage({ data }) {
+export default function Hero({ data }) {
   const { deleteHomePageSection, loading } = useContext(HomePageContext);
   const [deletingId, setDeletingId] = useState(null);
 
