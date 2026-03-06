@@ -8,6 +8,7 @@ const Hero = dynamic(() => import("@/components/homepage/Hero"), {
 });
 
 import { getHomePageData } from "@/backend/utils/server-only-methods";
+import HomeContent from "@/components/homepage/Homecontent";
 
 export const metadata = {
   title: "Home Page - Dashboard Admin",
@@ -16,12 +17,10 @@ export const metadata = {
 
 const HomePagePage = async () => {
   const homePageData = await getHomePageData();
+  const sectionsCount = homePageData.data?.sections?.length;
 
   if (process.env.NODE_ENV === "development") {
-    console.log(
-      "HomePage sections count:",
-      homePageData.data?.sections?.length || 0,
-    );
+    console.log("HomePage sections count:", sectionsCount || 0);
     console.log(
       "Featured products:",
       homePageData.data?.featuredSection?.products?.length || 0,
