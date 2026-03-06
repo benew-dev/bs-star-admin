@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useContext } from "react";
 import HomePageContext from "@/context/HomePageContext";
 
-export default function Hero({ data }) {
+const Hero = ({ data }) => {
   const { deleteHomePageSection, loading } = useContext(HomePageContext);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -246,4 +246,6 @@ export default function Hero({ data }) {
       </div>
     </div>
   );
-}
+};
+
+export default Hero;

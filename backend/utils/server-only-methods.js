@@ -9,71 +9,27 @@ import { getCookieName } from "@/helpers/helpers";
  * Récupérer les données de la page d'accueil
  */
 export const getHomePageData = async () => {
+  const nextCookies = await cookies();
+
+  const cookieName = getCookieName();
+  const nextAuthSessionToken = nextCookies.get(cookieName);
+
   try {
-    const apiUrl = `${
-      process.env.API_URL || "https://bs-start-client.vercel.app"
-    }/api/homepage`;
-
-    console.log("Fetching homepage data from:", apiUrl);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    const res = await fetch(apiUrl, {
-      signal: controller.signal,
-      next: {
-        revalidate: 3600,
-        tags: ["homepage"],
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/homepage`,
+      {
+        headers: {
+          Cookie: `${nextAuthSessionToken?.name}=${nextAuthSessionToken?.value}`,
+        },
       },
-    });
+    );
 
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      console.error(`API Error: ${res.status} - ${res.statusText}`);
-      return getDefaultData();
-    }
-
-    const responseBody = await res.json();
-
-    if (!responseBody.success) {
-      console.error("Invalid API response structure:", responseBody);
-      return getDefaultData();
-    }
-
-    return {
-      success: true,
-      message: "Données récupérées avec succès",
-      data: responseBody.data,
-      meta: responseBody.meta,
-    };
+    return data?.data || { sections: [] };
   } catch (error) {
-    if (error.name === "AbortError") {
-      console.error("Request timeout after 5 seconds");
-    } else {
-      console.error("Network error:", error.message);
-    }
-
-    return getDefaultData();
+    console.error("Error fetching homepage data:", error);
+    return { sections: [] };
   }
 };
-
-/**
- * Retourne les données par défaut en cas d'erreur
- */
-const getDefaultData = () => ({
-  success: false,
-  message: "Utilisation des données par défaut",
-  data: {
-    sections: [],
-    featuredSection: { isActive: false },
-    categoriesSection: { isActive: false },
-    newArrivalsSection: { isActive: false },
-    advantagesSection: { isActive: true },
-    testimonialsSection: { isActive: false },
-    ctaSection: { isActive: true },
-  },
-});
 
 /**
  * Récupérer une section spécifique de la page d'accueil

@@ -3,12 +3,11 @@ import dynamic from "next/dynamic";
 import Loading from "@/app/loading";
 import Link from "next/link";
 
-const Hero = dynamic(() => import("@/components/homepage/Hero"), {
+const HomePage = dynamic(() => import("@/components/homepage/HomePage"), {
   loading: () => <Loading />,
 });
 
 import { getHomePageData } from "@/backend/utils/server-only-methods";
-import HomeContent from "@/components/homepage/Homecontent";
 
 export const metadata = {
   title: "Home Page - Dashboard Admin",
@@ -17,16 +16,9 @@ export const metadata = {
 
 const HomePagePage = async () => {
   const homePageData = await getHomePageData();
-  const sectionsCount = homePageData.data?.sections?.length;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("HomePage sections count:", sectionsCount || 0);
-    console.log(
-      "Featured products:",
-      homePageData.data?.featuredSection?.products?.length || 0,
-    );
-  }
-
+  // Vérifier combien de sections existent
+  const sectionsCount = homePageData?.sections?.length || 0;
   const canAddMore = sectionsCount < 3;
 
   return (
@@ -123,8 +115,7 @@ const HomePagePage = async () => {
         </div>
       )}
 
-      <Hero homePageData={homePageData.data} />
-      <HomeContent homePageData={homePageData.data} />
+      <HomePage data={homePageData} />
     </div>
   );
 };
