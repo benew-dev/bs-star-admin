@@ -13,6 +13,18 @@ export const HomePageProvider = ({ children }) => {
 
   const router = useRouter();
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Créer / mettre à jour la homepage complète (toutes sections en une fois)
+  // homePageData = {
+  //   heroSection?:        { title, subtitle, text, image }
+  //   featuredSection?:    { isActive, title, highlight, eyebrow, description, products[], limit }
+  //   categoriesSection?:  { isActive, title, highlight, eyebrow, description, categories[], limit }
+  //   newArrivalsSection?: { isActive, title, highlight, eyebrow, description, products[], limit }
+  //   advantagesSection?:  { isActive, title, highlight, eyebrow, description, advantages[] }
+  //   testimonialsSection?:{ isActive, title, highlight, eyebrow, description, testimonials[] }
+  //   ctaSection?:         { isActive, eyebrow, title, highlight, titleEnd, description, ... }
+  // }
+  // ─────────────────────────────────────────────────────────────────────────────
   const createHomePage = async (homePageData) => {
     try {
       setLoading(true);
@@ -23,25 +35,30 @@ export const HomePageProvider = ({ children }) => {
       );
 
       if (data.success) {
-        toast.success(data.message || "Section ajoutée avec succès!");
+        toast.success(
+          data.message || "Page d'accueil sauvegardée avec succès !",
+        );
         router.push("/admin/homepage");
         router.refresh();
-        setLoading(false);
         return { success: true, data };
       }
     } catch (error) {
       const errorMessage =
         error?.response?.data?.message ||
+        error?.response?.data?.error ||
         error.message ||
-        "Failed to create homepage";
+        "Échec de la sauvegarde de la page d'accueil";
       setError(errorMessage);
       toast.error(errorMessage);
-      setLoading(false);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Nouvelle méthode : Mettre à jour une section spécifique
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Mettre à jour une hero section spécifique (par son _id dans sections[])
+  // ─────────────────────────────────────────────────────────────────────────────
   const updateHomePageSection = async (sectionId, sectionData) => {
     try {
       setLoading(true);
@@ -52,25 +69,28 @@ export const HomePageProvider = ({ children }) => {
       );
 
       if (data.success) {
-        toast.success("Section mise à jour avec succès!");
+        toast.success("Section hero mise à jour avec succès !");
         router.push("/admin/homepage");
         router.refresh();
-        setLoading(false);
         return { success: true, data };
       }
     } catch (error) {
       const errorMessage =
         error?.response?.data?.message ||
+        error?.response?.data?.error ||
         error.message ||
-        "Failed to update section";
+        "Échec de la mise à jour de la section";
       setError(errorMessage);
       toast.error(errorMessage);
-      setLoading(false);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Nouvelle méthode : Supprimer une section spécifique
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Supprimer une hero section spécifique (par son _id)
+  // ─────────────────────────────────────────────────────────────────────────────
   const deleteHomePageSection = async (sectionId) => {
     try {
       setLoading(true);
@@ -80,27 +100,58 @@ export const HomePageProvider = ({ children }) => {
       );
 
       if (data.success) {
-        toast.success("Section supprimée avec succès!");
+        toast.success("Section hero supprimée avec succès !");
         router.push("/admin/homepage");
         router.refresh();
-        setLoading(false);
         return { success: true, data };
       }
     } catch (error) {
       const errorMessage =
         error?.response?.data?.message ||
+        error?.response?.data?.error ||
         error.message ||
-        "Failed to delete section";
+        "Échec de la suppression de la section";
       setError(errorMessage);
       toast.error(errorMessage);
-      setLoading(false);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const clearErrors = () => {
-    setError(null);
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Mettre à jour une section non-hero (patch partiel via PUT /api/homepage/sections)
+  // sectionKey = "featuredSection" | "categoriesSection" | etc.
+  // ─────────────────────────────────────────────────────────────────────────────
+  const updateSection = async (sectionKey, sectionData) => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/homepage/sections`,
+        { [sectionKey]: sectionData },
+      );
+
+      if (data.success) {
+        toast.success("Section mise à jour avec succès !");
+        router.refresh();
+        return { success: true, data };
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error.message ||
+        "Échec de la mise à jour";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const clearErrors = () => setError(null);
 
   return (
     <HomePageContext.Provider
@@ -110,6 +161,7 @@ export const HomePageProvider = ({ children }) => {
         createHomePage,
         updateHomePageSection,
         deleteHomePageSection,
+        updateSection,
         clearErrors,
       }}
     >
