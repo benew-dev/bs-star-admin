@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import HomePageContext from "@/context/HomePageContext";
