@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/backend/config/dbConnect";
 import HomePage from "@/backend/models/homepage";
+import Product from "@/backend/models/product";
+import Category from "@/backend/models/category";
 import {
   authorizeRoles,
   isAuthenticatedUser,
