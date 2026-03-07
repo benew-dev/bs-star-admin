@@ -13,7 +13,11 @@ export async function GET(req) {
     authorizeRoles(NextResponse, "admin");
     await connectDB();
 
-    const homePage = await HomePage.findOne().sort({ createdAt: -1 });
+    const homePage = await HomePage.findOne()
+      .sort({ createdAt: -1 })
+      .populate("featuredSection.products.product", "name price images")
+      .populate("newArrivalsSection.products.product", "name price images")
+      .populate("categoriesSection.categories.category", "categoryName");
 
     return NextResponse.json({
       success: true,
