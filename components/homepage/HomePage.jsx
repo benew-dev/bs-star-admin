@@ -10,7 +10,15 @@ import HomePageContext from "@/context/HomePageContext";
 // Helpers UI
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SectionCard = ({ title, icon, children, accentColor = "indigo" }) => {
+const SectionCard = ({
+  title,
+  icon,
+  children,
+  accentColor = "indigo",
+  sectionKey,
+  onDelete,
+  deleting,
+}) => {
   const colors = {
     indigo: "from-indigo-500 to-purple-500",
     orange: "from-orange-400 to-pink-500",
@@ -29,7 +37,54 @@ const SectionCard = ({ title, icon, children, accentColor = "indigo" }) => {
         <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
           {icon}
         </div>
-        <h3 className="font-bold text-white text-base">{title}</h3>
+        <h3 className="font-bold text-white text-base flex-1">{title}</h3>
+        {sectionKey && (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/admin/homepage/edit/${sectionKey}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold transition-all border border-white/30"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              Modifier
+            </Link>
+            <button
+              onClick={() => onDelete(sectionKey)}
+              disabled={deleting === sectionKey}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+            >
+              {deleting === sectionKey ? (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              )}
+              Supprimer
+            </button>
+          </div>
+        )}
       </div>
       <div className="p-5">{children}</div>
     </div>
@@ -70,15 +125,58 @@ const Badge = ({ text, color = "orange" }) => {
 
 const Toggle = ({ active }) => (
   <span
-    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-      active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
-    }`}
+    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}
   >
     <span
       className={`w-1.5 h-1.5 rounded-full ${active ? "bg-green-500" : "bg-slate-400"}`}
     />
     {active ? "Active" : "Inactive"}
   </span>
+);
+
+const UnconfiguredSection = ({ sectionKey, label }) => (
+  <div className="border-2 border-dashed border-slate-200 rounded-2xl p-5 bg-slate-50 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 bg-slate-200 rounded-xl flex items-center justify-center">
+        <svg
+          className="w-5 h-5 text-slate-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          />
+        </svg>
+      </div>
+      <div>
+        <p className="font-semibold text-slate-600 text-sm">{label}</p>
+        <p className="text-xs text-slate-400">Section non configurée</p>
+      </div>
+    </div>
+    <Link
+      href={`/admin/homepage/edit/${sectionKey}`}
+      className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow"
+    >
+      <svg
+        className="w-3.5 h-3.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        />
+      </svg>
+      Configurer
+    </Link>
+  </div>
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -167,7 +265,6 @@ const HeroSection = ({ sections, onDelete, deletingId, loading }) => (
               </button>
             </div>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <Field label="Titre" value={section.title} />
             <Field label="Sous-titre" value={section.subtitle} />
@@ -175,7 +272,6 @@ const HeroSection = ({ sections, onDelete, deletingId, loading }) => (
               <Field label="Texte" value={section.text} />
             </div>
           </div>
-
           {section.image?.public_id && (
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
@@ -200,15 +296,15 @@ const HeroSection = ({ sections, onDelete, deletingId, loading }) => (
   </SectionCard>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section Featured (Coups de cœur)
-// ─────────────────────────────────────────────────────────────────────────────
-const FeaturedSection = ({ data }) => {
+const FeaturedSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="Coups de Cœur"
       accentColor="orange"
+      sectionKey="featuredSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -226,11 +322,7 @@ const FeaturedSection = ({ data }) => {
       }
     >
       <div className="space-y-4">
-        {/* Status + textes */}
-        <div className="flex items-center gap-2 mb-2">
-          <Toggle active={data.isActive} />
-        </div>
-
+        <Toggle active={data.isActive} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -243,8 +335,6 @@ const FeaturedSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
-        {/* Produits */}
         {data.products?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -282,15 +372,15 @@ const FeaturedSection = ({ data }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section Catégories
-// ─────────────────────────────────────────────────────────────────────────────
-const CategoriesSection = ({ data }) => {
+const CategoriesSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="Catégories"
       accentColor="blue"
+      sectionKey="categoriesSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -309,7 +399,6 @@ const CategoriesSection = ({ data }) => {
     >
       <div className="space-y-4">
         <Toggle active={data.isActive} />
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -322,7 +411,6 @@ const CategoriesSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
         {data.categories?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -337,9 +425,6 @@ const CategoriesSection = ({ data }) => {
                   <span className="text-xs font-semibold text-slate-700">
                     {item.category?.categoryName || `Catégorie ${i + 1}`}
                   </span>
-                  {item.icon && (
-                    <span className="text-xs text-slate-400">{item.icon}</span>
-                  )}
                   {item.color && <Badge text={item.color} color={item.color} />}
                 </div>
               ))}
@@ -351,15 +436,15 @@ const CategoriesSection = ({ data }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section Nouveautés
-// ─────────────────────────────────────────────────────────────────────────────
-const NewArrivalsSection = ({ data }) => {
+const NewArrivalsSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="Nouveautés"
       accentColor="green"
+      sectionKey="newArrivalsSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -378,7 +463,6 @@ const NewArrivalsSection = ({ data }) => {
     >
       <div className="space-y-4">
         <Toggle active={data.isActive} />
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -391,7 +475,6 @@ const NewArrivalsSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
         {data.products?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -436,15 +519,15 @@ const NewArrivalsSection = ({ data }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section Avantages
-// ─────────────────────────────────────────────────────────────────────────────
-const AdvantagesSection = ({ data }) => {
+const AdvantagesSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="Avantages"
       accentColor="purple"
+      sectionKey="advantagesSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -463,7 +546,6 @@ const AdvantagesSection = ({ data }) => {
     >
       <div className="space-y-4">
         <Toggle active={data.isActive} />
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -474,7 +556,6 @@ const AdvantagesSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
         {data.advantages?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -487,13 +568,7 @@ const AdvantagesSection = ({ data }) => {
                   className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200"
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${
-                      item.color === "pink"
-                        ? "bg-pink-100 text-pink-700"
-                        : item.color === "purple"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-orange-100 text-orange-700"
-                    }`}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${item.color === "pink" ? "bg-pink-100 text-pink-700" : item.color === "purple" ? "bg-purple-100 text-purple-700" : "bg-orange-100 text-orange-700"}`}
                   >
                     {item.icon?.[0] || "✓"}
                   </div>
@@ -515,15 +590,15 @@ const AdvantagesSection = ({ data }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section Témoignages
-// ─────────────────────────────────────────────────────────────────────────────
-const TestimonialsSection = ({ data }) => {
+const TestimonialsSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="Témoignages"
       accentColor="pink"
+      sectionKey="testimonialsSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -542,7 +617,6 @@ const TestimonialsSection = ({ data }) => {
     >
       <div className="space-y-4">
         <Toggle active={data.isActive} />
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -553,7 +627,6 @@ const TestimonialsSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
         {data.testimonials?.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -568,13 +641,7 @@ const TestimonialsSection = ({ data }) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                          item.accentColor === "pink"
-                            ? "bg-pink-500"
-                            : item.accentColor === "purple"
-                              ? "bg-purple-500"
-                              : "bg-orange-500"
-                        }`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${item.accentColor === "pink" ? "bg-pink-500" : item.accentColor === "purple" ? "bg-purple-500" : "bg-orange-500"}`}
                       >
                         {item.initials || item.name?.[0] || "?"}
                       </div>
@@ -604,15 +671,15 @@ const TestimonialsSection = ({ data }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Section CTA
-// ─────────────────────────────────────────────────────────────────────────────
-const CtaSection = ({ data }) => {
+const CtaSection = ({ data, onDelete, deleting }) => {
   if (!data) return null;
   return (
     <SectionCard
       title="CTA Final"
       accentColor="teal"
+      sectionKey="ctaSection"
+      onDelete={onDelete}
+      deleting={deleting}
       icon={
         <svg
           className="w-4 h-4"
@@ -631,7 +698,6 @@ const CtaSection = ({ data }) => {
     >
       <div className="space-y-4">
         <Toggle active={data.isActive} />
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Eyebrow" value={data.eyebrow} />
           <Field label="Titre" value={data.title} />
@@ -641,8 +707,6 @@ const CtaSection = ({ data }) => {
             <Field label="Description" value={data.description} />
           </div>
         </div>
-
-        {/* Boutons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-200 space-y-1">
             <p className="text-xs font-bold text-indigo-700">
@@ -682,25 +746,41 @@ const CtaSection = ({ data }) => {
 export default function HomePage({ data }) {
   const { deleteHomePageSection, loading } = useContext(HomePageContext);
   const [deletingId, setDeletingId] = useState(null);
+  const [deletingKey, setDeletingKey] = useState(null);
 
-  const handleDelete = async (sectionId, sectionTitle) => {
-    if (
-      !confirm(
-        `Êtes-vous sûr de vouloir supprimer la section "${sectionTitle}" ?`,
-      )
-    )
-      return;
+  const handleDeleteHero = async (sectionId, sectionTitle) => {
+    if (!confirm(`Supprimer la section hero "${sectionTitle}" ?`)) return;
     try {
       setDeletingId(sectionId);
       await deleteHomePageSection(sectionId);
-    } catch (error) {
-      console.error("Error deleting section:", error);
     } finally {
       setDeletingId(null);
     }
   };
 
-  // ── État vide ─────────────────────────────────────────────────────────────
+  const handleDeleteSection = async (sectionKey) => {
+    const labels = {
+      featuredSection: "Coups de Cœur",
+      categoriesSection: "Catégories",
+      newArrivalsSection: "Nouveautés",
+      advantagesSection: "Avantages",
+      testimonialsSection: "Témoignages",
+      ctaSection: "CTA Final",
+    };
+    if (
+      !confirm(
+        `Supprimer la section "${labels[sectionKey]}" ? Cette action est irréversible.`,
+      )
+    )
+      return;
+    try {
+      setDeletingKey(sectionKey);
+      await deleteHomePageSection(sectionKey);
+    } finally {
+      setDeletingKey(null);
+    }
+  };
+
   if (!data || !data.sections || data.sections.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
@@ -748,18 +828,9 @@ export default function HomePage({ data }) {
     );
   }
 
-  // ── Déterminer quelles sections non-hero sont configurées ─────────────────
-  const hasNonHeroSections =
-    data.featuredSection ||
-    data.categoriesSection ||
-    data.newArrivalsSection ||
-    data.advantagesSection ||
-    data.testimonialsSection ||
-    data.ctaSection;
-
   return (
     <div className="space-y-6">
-      {/* En-tête */}
+      {/* En-tête récapitulatif */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-5 sm:p-6">
           <div className="flex items-center gap-4">
@@ -783,20 +854,13 @@ export default function HomePage({ data }) {
               <p className="text-sm text-white/80">
                 Page d'accueil — {data.sections.length} slide
                 {data.sections.length > 1 ? "s" : ""} hero
-                {hasNonHeroSections ? " + sections additionnelles" : ""}
               </p>
             </div>
           </div>
         </div>
-
-        {/* Résumé des sections */}
         <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b border-slate-100">
           {[
-            {
-              label: "Hero Slides",
-              value: `${data.sections.length}/3`,
-              color: "indigo",
-            },
+            { label: "Hero Slides", value: `${data.sections.length}/3` },
             {
               label: "Coups de cœur",
               value: data.featuredSection
@@ -804,21 +868,18 @@ export default function HomePage({ data }) {
                   ? "Active"
                   : "Inactive"
                 : "Non configuré",
-              color: "orange",
             },
             {
               label: "Avantages",
               value: data.advantagesSection?.advantages?.length
                 ? `${data.advantagesSection.advantages.length} items`
                 : "Non configuré",
-              color: "purple",
             },
             {
               label: "Témoignages",
               value: data.testimonialsSection?.testimonials?.length
                 ? `${data.testimonialsSection.testimonials.length} avis`
                 : "Non configuré",
-              color: "pink",
             },
           ].map((stat) => (
             <div
@@ -832,36 +893,84 @@ export default function HomePage({ data }) {
         </div>
       </div>
 
-      {/* ── Hero Slides ─────────────────────────────────────────────────── */}
       <HeroSection
         sections={data.sections}
-        onDelete={handleDelete}
+        onDelete={handleDeleteHero}
         deletingId={deletingId}
         loading={loading}
       />
 
-      {/* ── Sections additionnelles ──────────────────────────────────────── */}
-      {hasNonHeroSections ? (
-        <>
-          <FeaturedSection data={data.featuredSection} />
-          <CategoriesSection data={data.categoriesSection} />
-          <NewArrivalsSection data={data.newArrivalsSection} />
-          <AdvantagesSection data={data.advantagesSection} />
-          <TestimonialsSection data={data.testimonialsSection} />
-          <CtaSection data={data.ctaSection} />
-        </>
-      ) : (
-        <div className="bg-amber-50 border-l-4 border-amber-400 rounded-xl p-4">
-          <p className="text-sm font-semibold text-amber-800 mb-1">
-            Sections additionnelles non configurées
-          </p>
-          <p className="text-sm text-amber-700">
-            Seules les slides hero ont été configurées. Créez une nouvelle
-            entrée pour configurer les sections Coups de cœur, Catégories,
-            Nouveautés, Avantages, Témoignages et CTA.
-          </p>
-        </div>
-      )}
+      <div className="space-y-4">
+        {data.featuredSection ? (
+          <FeaturedSection
+            data={data.featuredSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection
+            sectionKey="featuredSection"
+            label="Coups de Cœur"
+          />
+        )}
+        {data.categoriesSection ? (
+          <CategoriesSection
+            data={data.categoriesSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection
+            sectionKey="categoriesSection"
+            label="Catégories"
+          />
+        )}
+        {data.newArrivalsSection ? (
+          <NewArrivalsSection
+            data={data.newArrivalsSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection
+            sectionKey="newArrivalsSection"
+            label="Nouveautés"
+          />
+        )}
+        {data.advantagesSection ? (
+          <AdvantagesSection
+            data={data.advantagesSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection
+            sectionKey="advantagesSection"
+            label="Avantages"
+          />
+        )}
+        {data.testimonialsSection ? (
+          <TestimonialsSection
+            data={data.testimonialsSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection
+            sectionKey="testimonialsSection"
+            label="Témoignages"
+          />
+        )}
+        {data.ctaSection ? (
+          <CtaSection
+            data={data.ctaSection}
+            onDelete={handleDeleteSection}
+            deleting={deletingKey}
+          />
+        ) : (
+          <UnconfiguredSection sectionKey="ctaSection" label="CTA Final" />
+        )}
+      </div>
     </div>
   );
 }
