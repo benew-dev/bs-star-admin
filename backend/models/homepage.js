@@ -588,7 +588,6 @@ homePageSchema.pre("save", async function (next) {
       );
     }
   }
-  next();
 });
 
 // Méthode statique pour récupérer la homepage peuplée (pour le client)
